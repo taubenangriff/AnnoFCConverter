@@ -22,8 +22,8 @@ namespace AnnoFCConverter
             string SpecificOutputFile = "-o";
             string Overwrite = "-y";
 
-            Console.WriteLine(ReadCDATA + " <InputFilename> for 1800 and " + ReadCDATA2070Mode + " <InputFilename> for 2070 to make  <InputFilename>.fc editable");
-            Console.WriteLine(WriteCDATA + " <InputFilename> for 1800 and " + WriteCDATA2070Mode + " <InputFilename> for 2070 to bring <InputFilename>.html back into .fc");
+            Console.WriteLine(ReadCDATA + " <InputFilename> for 1800 and " + ReadCDATA2070Mode + " <InputFilename> for 2070 to make  <InputFilename> editable");
+            Console.WriteLine(WriteCDATA + " <InputFilename> for 1800 and " + WriteCDATA2070Mode + " <InputFilename> for 2070 to bring <InputFilename> back into .fc");
             Console.WriteLine(SpecificOutputFile + " <OutputFilename> to set a specific output filename");
             Console.WriteLine(Overwrite + " to overwrite the output File");
             Console.WriteLine(""); 
