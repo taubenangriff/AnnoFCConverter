@@ -13,7 +13,7 @@ namespace AnnoFCConverter
         {
             string appName = "Anno 1800 FC-Converter";
             string version = "1.0.0";
-            Console.WriteLine("{0}: Version {1}", appName, version);
+            Console.WriteLine("{0}: Version {1}     How to use:", appName, version);
 
             string ReadCDATA = "-r";
             string WriteCDATA = "-w";
@@ -22,14 +22,11 @@ namespace AnnoFCConverter
             string SpecificOutputFile = "-o";
             string Overwrite = "-y";
 
-            Console.WriteLine("How to Use:");
-            Console.WriteLine(ReadCDATA + " <InputFilename> to make an Anno 1800 <InputFilename>.fc editable");
-            Console.WriteLine(WriteCDATA + " <InputFilename> to convert <InputFilename>.html into an Anno 1800 .fc");
-            Console.WriteLine(ReadCDATA2070Mode + " <InputFilename> to make an Anno 2070 <InputFilename>.fc <InputFilename> editable");
-            Console.WriteLine(WriteCDATA + " <InputFilename> to convert <InputFilename>.html into an Anno 2070 .fc");
+            Console.WriteLine(ReadCDATA + " <InputFilename> for 1800 and " + ReadCDATA2070Mode + " <InputFilename> for 2070 to make  <InputFilename>.fc editable");
+            Console.WriteLine(WriteCDATA + " <InputFilename> for 1800 and " + WriteCDATA2070Mode + " <InputFilename> for 2070 to bring <InputFilename>.html back into .fc");
             Console.WriteLine(SpecificOutputFile + " <OutputFilename> to set a specific output filename");
             Console.WriteLine(Overwrite + " to overwrite the output File");
-            Console.WriteLine("File types are added automatically so instead of <filename>.fc you just have to type <filename>");
+            Console.WriteLine(""); 
 
             FCConverter p = new FCConverter();
 
@@ -98,74 +95,114 @@ namespace AnnoFCConverter
                     }
                 }
             }
-
-            if (!hasSpecificOutputFile)
-            {
-                OutputFileName = InputFileName;
-            }
-
             switch (mode)
             {
                 case "readCDATA":
-                    if (File.Exists(OutputFileName + ".html") && !OverwriteFile)
+                    if (!hasSpecificOutputFile)
                     {
-                        Console.WriteLine("OutputFile Already Exists. Use " + Overwrite + " as argument to overwrite the file");
+                        OutputFileName = InputFileName.Replace(".fc", "") + ".html";
                     }
-                    if (!File.Exists(InputFileName + ".fc"))
+                    if (!InputFileName.EndsWith(".fc") || !OutputFileName.EndsWith(".html"))
                     {
-                        Console.WriteLine("Input File does not exist");
+                        Console.WriteLine("Error: Wrong File Types, Input must be .fc and Output must be .html ");
                     }
-                    else
-                    {
-                        p.ConvertToHTMLFile(InputFileName + ".fc", OutputFileName + ".html");
-                        Console.WriteLine("Converted " + InputFileName + ".fc to " + OutputFileName + ".html");
+                    else {
+                        if (File.Exists(OutputFileName) && !OverwriteFile)
+                        {
+                            Console.WriteLine("OutputFile Already Exists. Use " + Overwrite + " as argument to overwrite the file");
+                        }
+                        else if (!File.Exists(InputFileName))
+                        {
+                            Console.WriteLine("Input File does not exist");
+                        }
+                        else
+                        {
+                            p.ConvertToHTMLFile(InputFileName, OutputFileName);
+                            Console.WriteLine("Converted " + InputFileName + " to " + OutputFileName);
+                        }
                     }
+                    
 
                     break;
                 case "writeCDATA":
-                    if (File.Exists(OutputFileName + ".fc") && !OverwriteFile)
+                    if (!hasSpecificOutputFile)
                     {
-                        Console.WriteLine("OutputFile Already Exists. Use " + Overwrite + " as argument to overwrite the file");
+                        OutputFileName = InputFileName.Replace(".html", "") + ".fc";
                     }
-                    if (!File.Exists(InputFileName + ".html"))
+                    if (!InputFileName.EndsWith(".html") || !OutputFileName.EndsWith(".fc"))
                     {
-                        Console.WriteLine("Input File does not exist");
+                        Console.WriteLine("Error: Wrong File Types, Input must be .html and Output must be .fc ");
                     }
-                    else
-                    {
-                        p.ConvertToFCFile(InputFileName + ".html", OutputFileName + ".fc");
-                        Console.WriteLine("Converted " + InputFileName + ".html to " + OutputFileName + ".fc");
+                    else {
+                        if (File.Exists(OutputFileName + ".fc") && !OverwriteFile)
+                        {
+                            Console.WriteLine("OutputFile Already Exists. Use " + Overwrite + " as argument to overwrite the file");
+                        }
+                        else if (!File.Exists(InputFileName + ".html"))
+                        {
+                            Console.WriteLine("Input File does not exist");
+                        }
+                        else
+                        {
+                            p.ConvertToFCFile(InputFileName + ".html", OutputFileName + ".fc");
+                            Console.WriteLine("Converted " + InputFileName + " to " + OutputFileName);
+                        }
                     }
+                    
+                    
                     break;
                 case "readCDATA2070Mode":
-                    if (File.Exists(OutputFileName + ".html") && !OverwriteFile)
+                    if (!hasSpecificOutputFile)
                     {
-                        Console.WriteLine("OutputFile Already Exists. Use " + Overwrite + " as argument to overwrite the file");
+                        OutputFileName = InputFileName.Replace(".fc", "") + ".html";
                     }
-                    if (!File.Exists(InputFileName + ".fc"))
+                    if (!InputFileName.EndsWith(".fc") || !OutputFileName.EndsWith(".html"))
                     {
-                        Console.WriteLine("Input File does not exist");
+                        Console.WriteLine("Error: Wrong File Types, Input must be .fc and Output must be .html ");
                     }
-                    else
-                    {
-                        p.Convert2070IntoHTML(InputFileName + ".fc", OutputFileName + ".html");
-                        Console.WriteLine("Converted " + InputFileName + ".fc to " + OutputFileName + ".html");
+                    else {
+                        if (File.Exists(OutputFileName) && !OverwriteFile)
+                        {
+                            Console.WriteLine("OutputFile Already Exists. Use " + Overwrite + " as argument to overwrite the file");
+                        }
+                        else if (!File.Exists(InputFileName))
+                        {
+                            Console.WriteLine("Input File does not exist");
+                        }
+                        else
+                        {
+                            p.Convert2070IntoHTML(InputFileName, OutputFileName);
+                            Console.WriteLine("Converted " + InputFileName + " to " + OutputFileName);
+                        }
                     }
+                    
+                    
                     break;
                 case "writeCDATA2070Mode":
-                    if (File.Exists(OutputFileName + ".fc") && !OverwriteFile)
+                    if (!hasSpecificOutputFile)
                     {
-                        Console.WriteLine("OutputFile Already Exists. Use " + Overwrite + " as argument to overwrite the file");
+                        OutputFileName = InputFileName.Replace(".html", "") + ".fc";
                     }
-                    if (!File.Exists(InputFileName + ".html"))
+                    if (!InputFileName.EndsWith(".html") || !OutputFileName.EndsWith(".fc"))
                     {
-                        Console.WriteLine("Input File does not exist");
+                        Console.WriteLine("Error: Wrong File Types, Input must be .html and Output must be .fc ");
                     }
-                    else
-                    {
-                        p.ConvertTo2070FCFile(InputFileName + ".html", OutputFileName + ".fc");
-                        Console.WriteLine("Converted " + InputFileName + ".html to " + OutputFileName + ".fc");
+                    else {
+                        if (File.Exists(OutputFileName + ".fc") && !OverwriteFile)
+                        {
+                            Console.WriteLine("OutputFile Already Exists. Use " + Overwrite + " as argument to overwrite the file");
+                        }
+                        else if (!File.Exists(InputFileName + ".html"))
+                        {
+                            Console.WriteLine("Input File does not exist");
+                        }
+                        else
+                        {
+                            p.ConvertTo2070FCFile(InputFileName + ".html", OutputFileName + ".fc");
+                            Console.WriteLine("Converted " + InputFileName + " to " + OutputFileName);
+                        }
                     }
+                   
                     break;
                 case "":
                     Console.WriteLine("Error: No Mode for conversion was set");
@@ -399,7 +436,11 @@ namespace AnnoFCConverter
             ///every time we advance c forward we need to tick a position forward to get the right hex when we need it
             string[] HexData = ReadFileToHex(path);
             int offset = 0;
-            using (StreamWriter sw = new StreamWriter(OutputPath))
+            if (File.Exists(OutputPath)) {
+                File.Delete(OutputPath);
+            }
+            FileStream fs = new FileStream(OutputPath, FileMode.CreateNew);
+            using (StreamWriter sw = new StreamWriter(fs))
             {
                 char c = ToChar(HexData[offset]);
                 offset++;
@@ -511,7 +552,12 @@ namespace AnnoFCConverter
             string token = "";
             c = ToChar(HexData[offset]);
             offset++;
-            using (StreamWriter sw = new StreamWriter(OutputPath))
+            if (File.Exists(OutputPath))
+            {
+                File.Delete(OutputPath);
+            }
+            FileStream fs = new FileStream(OutputPath, FileMode.CreateNew);
+            using (StreamWriter sw = new StreamWriter(fs))
             {
                 while (offset < HexData.Length - 1)
                 {
