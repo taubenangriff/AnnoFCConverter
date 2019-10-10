@@ -12,7 +12,7 @@ namespace AnnoFCConverter
         static void Main(string[] args)
         {
             string appName = "Anno 1800 FC-Converter";
-            string version = "Alpha 1.1.0 Non Public";
+            string version = "1.0.0";
             Console.WriteLine("{0}: Version {1}", appName, version);
 
             string ReadCDATA = "-r";
@@ -28,7 +28,8 @@ namespace AnnoFCConverter
             Console.WriteLine(ReadCDATA2070Mode + " <InputFilename> to make an Anno 2070 <InputFilename>.fc <InputFilename> editable");
             Console.WriteLine(WriteCDATA + " <InputFilename> to convert <InputFilename>.html into an Anno 2070 .fc");
             Console.WriteLine(SpecificOutputFile + " <OutputFilename> to set a specific output filename");
-            Console.WriteLine(Overwrite + " to overwrite the output File"); 
+            Console.WriteLine(Overwrite + " to overwrite the output File");
+            Console.WriteLine("File types are added automatically so instead of <filename>.fc you just have to type <filename>");
 
             FCConverter p = new FCConverter();
 
@@ -117,6 +118,7 @@ namespace AnnoFCConverter
                     else
                     {
                         p.ConvertToHTMLFile(InputFileName + ".fc", OutputFileName + ".html");
+                        Console.WriteLine("Converted " + InputFileName + ".fc to " + OutputFileName + ".html");
                     }
 
                     break;
@@ -132,6 +134,7 @@ namespace AnnoFCConverter
                     else
                     {
                         p.ConvertToFCFile(InputFileName + ".html", OutputFileName + ".fc");
+                        Console.WriteLine("Converted " + InputFileName + ".html to " + OutputFileName + ".fc");
                     }
                     break;
                 case "readCDATA2070Mode":
@@ -146,6 +149,7 @@ namespace AnnoFCConverter
                     else
                     {
                         p.Convert2070IntoHTML(InputFileName + ".fc", OutputFileName + ".html");
+                        Console.WriteLine("Converted " + InputFileName + ".fc to " + OutputFileName + ".html");
                     }
                     break;
                 case "writeCDATA2070Mode":
@@ -160,6 +164,7 @@ namespace AnnoFCConverter
                     else
                     {
                         p.ConvertTo2070FCFile(InputFileName + ".html", OutputFileName + ".fc");
+                        Console.WriteLine("Converted " + InputFileName + ".html to " + OutputFileName + ".fc");
                     }
                     break;
                 case "":
@@ -172,6 +177,9 @@ namespace AnnoFCConverter
 
         private void ConvertToFCFile(string InputPath, string OutputPath)
         {
+            if (File.Exists(OutputPath)) {
+                File.Delete(OutputPath); 
+            }
             FileStream fs = new FileStream(OutputPath, FileMode.CreateNew);
             using (StreamReader sr = new StreamReader(InputPath))
             using (BinaryWriter bw = new BinaryWriter(fs))
@@ -222,10 +230,8 @@ namespace AnnoFCConverter
                         }
                         //reset the token
                         token = "";
-                    }
-
-                    //as long as there is no opening < character the file gets parsed and added directly to the output 
-                    if (c != '<')
+                    }//as long as there is no opening < character the file gets parsed and added directly to the output 
+                    else if (c != '<')
                     {
                         while (c != '<')
                         {
@@ -245,6 +251,10 @@ namespace AnnoFCConverter
 
         private void ConvertTo2070FCFile(string InputPath, string OutputPath)
         {
+            if (File.Exists(OutputPath))
+            {
+                File.Delete(OutputPath);
+            }
             FileStream fs = new FileStream(OutputPath, FileMode.CreateNew);
             using (StreamReader sr = new StreamReader(InputPath))
             using (BinaryWriter bw = new BinaryWriter(fs))
@@ -341,9 +351,8 @@ namespace AnnoFCConverter
                         //reset the token
                         token = "";
                     }
-
                     //as long as there is no opening < character the file gets parsed and added directly to the output 
-                    if (c != '<')
+                    else if (c != '<')
                     {
                         while (c != '<')
                         {
@@ -358,7 +367,6 @@ namespace AnnoFCConverter
                     }
                 }
             }
-            Console.WriteLine("f");
         }
 
         private string[] ReadFileToHex(string Path)
@@ -380,100 +388,6 @@ namespace AnnoFCConverter
 
         }
 
-        private void CheckFilesForHTML(string path, string OutputPath)
-        {
-            if (!File.Exists(path))
-            {
-                Console.WriteLine("File" + path + " Could not be read");
-            }
-            else if (File.Exists(OutputPath))
-            {
-                Console.WriteLine("File " + OutputPath + " Already exists. Type c to continue");
-                string ConsoleInput = Console.ReadLine();
-                if (ConsoleInput.Equals("c"))
-                {
-                    Console.WriteLine("Writing File " + OutputPath);
-                    ConvertToHTMLFile(path, OutputPath);
-                }
-            }
-            else
-            {
-                Console.WriteLine("Writing File " + OutputPath);
-                ConvertToHTMLFile(path, OutputPath);
-            }
-        }
-
-        private void CheckFilesFor2070HTML(string path, string OutputPath)
-        {
-            if (!File.Exists(path))
-            {
-                Console.WriteLine("File" + path + " Could not be read");
-            }
-            else if (File.Exists(OutputPath))
-            {
-                Console.WriteLine("File " + OutputPath + " Already exists. Type c to continue");
-                string ConsoleInput = Console.ReadLine();
-                if (ConsoleInput.Equals("c"))
-                {
-                    Console.WriteLine("Writing File " + OutputPath);
-                    Convert2070IntoHTML(path, OutputPath);
-                }
-            }
-            else
-            {
-                Console.WriteLine("Writing File " + OutputPath);
-                Convert2070IntoHTML(path, OutputPath);
-            }
-        }
-
-        private void CheckFilesForFC(string InputPath, string OutputPath)
-        {
-            if (!File.Exists(InputPath))
-            {
-                Console.WriteLine("File " + InputPath + " Could not be read");
-            }
-            else if (File.Exists(OutputPath))
-            {
-                Console.WriteLine("File " + OutputPath + " Already exists. Type c to continue");
-                string ConsoleInput = Console.ReadLine();
-                if (ConsoleInput.Equals("c"))
-                {
-                    File.Delete(OutputPath);
-                    Console.WriteLine("Writing File " + OutputPath);
-                    ConvertToFCFile(InputPath, OutputPath);
-                }
-            }
-            else
-            {
-                Console.WriteLine("Writing File " + OutputPath);
-                ConvertToFCFile(InputPath, OutputPath);
-            }
-        }
-
-
-        private void CheckFilesFor2070FC(string InputPath, string OutputPath)
-        {
-            if (!File.Exists(InputPath))
-            {
-                Console.WriteLine("File " + InputPath + " Could not be read");
-            }
-            else if (File.Exists(OutputPath))
-            {
-                Console.WriteLine("File " + OutputPath + " Already exists. Type c to continue");
-                string ConsoleInput = Console.ReadLine();
-                if (ConsoleInput.Equals("c"))
-                {
-                    File.Delete(OutputPath);
-                    Console.WriteLine("Writing File " + OutputPath);
-                    ConvertTo2070FCFile(InputPath, OutputPath);
-                }
-            }
-            else
-            {
-                Console.WriteLine("Writing File " + OutputPath);
-                ConvertTo2070FCFile(InputPath, OutputPath);
-            }
-        }
         /// <summary>
         /// Converts an Anno 1800 .fc file into an html file
         /// </summary>
@@ -489,7 +403,7 @@ namespace AnnoFCConverter
             {
                 char c = ToChar(HexData[offset]);
                 offset++;
-                while (offset < HexData.Length)
+                while (offset < HexData.Length -1)
                 {
                     if (c == '<')
                     {
@@ -599,7 +513,7 @@ namespace AnnoFCConverter
             offset++;
             using (StreamWriter sw = new StreamWriter(OutputPath))
             {
-                while (offset < HexData.Length)
+                while (offset < HexData.Length - 1)
                 {
                     if (c == '<')
                     {
