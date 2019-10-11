@@ -12,7 +12,7 @@ namespace AnnoFCConverter
         static void Main(string[] args)
         {
             string appName = "Anno 1800 FC-Converter";
-            string version = "1.2.0";
+            string version = "1.1.0";
             Console.WriteLine("{0}: Version {1}     How to use:", appName, version);
 
             string ReadCDATA = "-r";
