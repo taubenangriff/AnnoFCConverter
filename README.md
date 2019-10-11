@@ -11,3 +11,5 @@ AnnoFCConverter.exe with some of those arguments.
 -y to overwrite the output File
 
 So i.e. to make crops_farm.fc (hypothetical 1800 .fc) for you should type AnnoFCConverter.exe -r crops_farm.fc
+
+thanks to judekw for figuring out how the .fc files work and to meow for taking a look at my code!
