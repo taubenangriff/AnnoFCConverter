@@ -12,7 +12,7 @@ namespace AnnoFCConverter
         static void Main(string[] args)
         {
             string appName = "Anno 1800 FC-Converter";
-            string version = "1.0.0";
+            string version = "1.2.0";
             Console.WriteLine("{0}: Version {1}     How to use:", appName, version);
 
             string ReadCDATA = "-r";
@@ -791,7 +791,7 @@ namespace AnnoFCConverter
 
         /// <summary>
         /// First try to convert anno 2070 island files to html because they are similar in the way that they also use cdata for many things like heightmaps and positions. 
-        /// The same algorithm, slightly modified and with other interpretations for cdata should give a converter for Anno 2070 islands
+        /// The same algorithm, slightly modified and with other interpretations for cdata should give the possibility to analyze anno 2070 islands easily.
         /// </summary>
         /// <param name="path">path of the input file</param>
         /// <param name="OutputPath">path of the output file</param>
@@ -843,36 +843,267 @@ namespace AnnoFCConverter
                         }
 
                         //32 bit int conversion without division
-                        if (token.Equals("<m_Connections>") || token.Equals("<m_BitGrid>") || token.Equals("<m_RenderParameters>")) { }
+                        if (token.Equals("<m_Connections>") || token.Equals("<m_BitGrid>") || token.Equals("<m_RenderParameters>"))
+                        {
 
+                            //jump by CDATA so c equals '['
+                            if (c == 'C')
+                            {
+                                while (c != '[')
+                                {
+                                    offset++;
+                                    c = ToChar(HexData[offset]);
+                                }
+                                //write CDATA[ and advance by one character
+                                offset++;
+                                c = ToChar(HexData[offset]);
+
+                                {
+                                    sw.Write("CDATA[");
+                                    //interpret cdata as an 32 bit int
+                                    int[] CDATAAsInt = ConvertCDATAToInt32(HexData, offset);
+                                    int ByteSize = CDATAAsInt[0];
+                                    //advance to the end of cdata
+                                    offset += ByteSize + 4;
+                                    for (int i = 0; i <= ByteSize / 4; i++)
+                                    {
+                                        sw.Write(CDATAAsInt[i]);
+                                        if (i < ByteSize / 4)
+                                        {
+                                            sw.Write(" ");
+                                        }
+                                    }
+                                    c = ToChar(HexData[offset]);
+                                }
+                            }
+                            sw.Flush();
+
+                        }
                         //conversion to 32 bit int with division by 4096
-                        else if (token.Equals("<i>") || token.Equals("<m_Position>") || token.Equals("<m_StreetGrid>")) { }
+                        else if (token.Equals("<i>") || token.Equals("<m_Position>") || token.Equals("<m_StreetGrid>"))
+                        {
 
+                            //jump by CDATA so c equals '['
+                            if (c == 'C')
+                            {
+                                while (c != '[')
+                                {
+                                    offset++;
+                                    c = ToChar(HexData[offset]);
+                                }
+                                //write CDATA[ and advance by one character
+                                offset++;
+                                c = ToChar(HexData[offset]);
+                                {
+                                    sw.Write("CDATA[");
+                                    //interpret cdata as an 32 bit int
+                                    int[] CDATAAsInt = ConvertCDATAToInt32(HexData, offset);
+                                    int ByteSize = CDATAAsInt[0];
+                                    //advance to the end of cdata
+                                    offset += ByteSize + 4;
+                                    sw.Write(ByteSize);
+                                    sw.Write(" ");
+                                    for (int i = 1; i <= ByteSize / 4; i++)
+                                    {
+                                        sw.Write((float)CDATAAsInt[i] / 4096);
+                                        if (i < ByteSize / 4)
+                                        {
+                                            sw.Write(" ");
+                                        }
+                                    }
+                                    c = ToChar(HexData[offset]);
+                                }
+                            }
+                            sw.Flush();
+
+                        }
                         //float
-                        else if (token.Equals("<m_Orientation>")) { }
+                        else if (token.Equals("<m_Orientation>") || token.Equals("<Position>") || token.Equals("<p>"))
+                        {
+
+                            //jump by CDATA so c equals '['
+                            if (c == 'C')
+                            {
+                                while (c != '[')
+                                {
+                                    offset++;
+                                    c = ToChar(HexData[offset]);
+                                }
+                                //write CDATA[ and advance by one character
+                                offset++;
+                                c = ToChar(HexData[offset]);
+
+
+                                {
+                                    sw.Write("CDATA[");
+                                    //interpret cdata as an 32 bit int
+                                    float[] CDATAAsFloat = ConvertCDATAToFloat(HexData, offset);
+                                    int ByteSize = (int)CDATAAsFloat[0];
+                                    //advance to the end of cdata
+                                    offset += ByteSize + 4;
+                                    for (int i = 0; i <= ByteSize / 4; i++)
+                                    {
+                                        sw.Write(CDATAAsFloat[i]);
+                                        if (i < ByteSize / 4)
+                                        {
+                                            sw.Write(" ");
+                                        }
+                                    }
+                                    c = ToChar(HexData[offset]);
+                                }
+                            }
+                            sw.Flush();
+
+                        }
 
                         //16 Bit uint 
-                        else if (token.Equals("<m_HeightMap_v2>")) { }
+                        else if (token.Equals("<m_HeightMap_v2>"))
+                        {
+
+                            //jump by CDATA so c equals '['
+                            if (c == 'C')
+                            {
+                                while (c != '[')
+                                {
+                                    offset++;
+                                    c = ToChar(HexData[offset]);
+                                }
+                                //write CDATA[ and advance by one character
+                                offset++;
+                                c = ToChar(HexData[offset]);
+                                int breakpointInt = 1; 
+                                {
+                                    sw.Write("CDATA[");
+                                    //interpret cdata as an 32 bit int
+                                    uint[] CDATAAsInt = ConvertCDATAToUint16(HexData, offset);
+                                    int ByteSize = (int)CDATAAsInt[0];
+                                    //advance to the end of cdata
+                                    offset += ByteSize + 4;
+                                    sw.Write(ByteSize);
+                                    sw.Write("\n\t\t");
+                                    for (int i = 1; i <= ByteSize / 2; i++)
+                                    {
+                                        sw.Write((float)CDATAAsInt[i] / 4096);
+                                        if (breakpointInt % 17 == 0)
+                                        {
+                                            sw.Write("\n\t\t");
+                                            breakpointInt++;
+                                        }
+                                        else if (i < ByteSize / 2)
+                                        {
+                                            sw.Write(" ");
+                                            breakpointInt++;
+                                        }
+                                    }
+                                    c = ToChar(HexData[offset]);
+                                }
+                            }
+                            sw.Flush();
+                        }
+
 
                         //for a heightmap this needs to be 32 bit int, for a alphamap this needs to be 8 bit uint
-                        else if (token.Equals("<Data>")) { }
+                        else if (token.Equals("<Data>"))
+                        {
+                            if (DataParseMode.Equals("height"))
+                            {
+                                //jump by CDATA so c equals '['
+                                if (c == 'C')
+                                {
+                                    while (c != '[')
+                                    {
+                                        offset++;
+                                        c = ToChar(HexData[offset]);
+                                    }
+                                    //write CDATA[ and advance by one character
+                                    offset++;
+                                    c = ToChar(HexData[offset]);
+                                    int breakpointInt = 0; 
+
+                                    {
+                                        sw.Write("CDATA[");
+                                        //interpret cdata as an 32 bit float
+                                        float[] CDATAAsFloat = ConvertCDATAToFloat(HexData, offset);
+                                        int ByteSize = (int)CDATAAsFloat[0];
+                                        //advance to the end of cdata
+                                        offset += ByteSize + 4;
+                                        for (int i = 0; i <= ByteSize / 4; i++)
+                                        {
+                                            sw.Write(CDATAAsFloat[i]);
+                                            if (breakpointInt % 17 == 0) {
+                                                sw.Write("\n\t\t\t\t\t");
+                                                breakpointInt++;
+                                            }
+                                            else if (i < ByteSize / 4)
+                                            {
+                                                sw.Write(" ");
+                                                breakpointInt++; 
+                                            }
+                                        }
+                                        c = ToChar(HexData[offset]);
+                                    }
+                                }
+                                sw.Flush();
+                            }
+                            else if (DataParseMode.Equals("alpha"))
+                            {
+                                {
+                                    //jump by CDATA so c equals '['
+                                    if (c == 'C')
+                                    {
+                                        while (c != '[')
+                                        {
+                                            offset++;
+                                            c = ToChar(HexData[offset]);
+                                        }
+                                        //write CDATA[ and advance by one character
+                                        offset++;
+                                        c = ToChar(HexData[offset]);
+                                        int breakpointInt = 0; 
+                                        {
+                                            sw.Write("CDATA[");
+                                            //interpret cdata as an 8 bit uint
+                                            uint[] CDATAAsInt = ConvertCDATAToUint8(HexData, offset);
+                                            int ByteSize = (int)CDATAAsInt[0];
+                                            //advance to the end of cdata
+                                            offset += ByteSize + 4;
+                                            for (int i = 0; i <= ByteSize; i++)
+                                            {
+                                                sw.Write(CDATAAsInt[i]);
+                                                if (breakpointInt % 17 == 0)
+                                                {
+                                                    sw.Write("\n\t\t\t\t\t");
+                                                    breakpointInt++;
+                                                }
+                                                else if (i < ByteSize)
+                                                {
+                                                    sw.Write(" ");
+                                                    breakpointInt++;
+                                                }
+                                            }
+                                            c = ToChar(HexData[offset]);
+                                        }
+                                    }
+                                    sw.Flush();
+                                }
+                            }
+                        }
+                        token = "";
                     }
 
 
                     //as long as there is no opening < character the file gets parsed and added directly to the output 
-                    if (c != '<' && offset < HexData.Length - 1)
+                    if (c != '<')
                     {
-                        while (c != '<')
+                        while (c != '<' && offset < HexData.Length - 1)
                         {
                             token += c;
-                            c = ToChar(HexData[offset]);
                             offset++;
+                            c = ToChar(HexData[offset]);
+
                         }
-                        token = token.Replace("\b", "");
-                        token = token.Replace("\n", "");
                         sw.Write(token);
                         sw.Flush();
-
                         token = "";
                     }
                 }
