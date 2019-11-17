@@ -15,12 +15,16 @@ namespace AnnoFCConverter
             string version = "1.1.0";
             Console.WriteLine("{0}: Version {1}     How to use:", appName, version);
 
+
+            //final variables
             string ReadCDATA = "-r";
             string WriteCDATA = "-w";
             string ReadCDATA2070Mode = "-rz";
             string WriteCDATA2070Mode = "-wz";
             string SpecificOutputFile = "-o";
             string Overwrite = "-y";
+            string IsdToHtml = "-i";
+            string HtmlToIsd = "-wi";
 
             Console.WriteLine(ReadCDATA + " <InputFilename> for 1800 and " + ReadCDATA2070Mode + " <InputFilename> for 2070 to make  <InputFilename> editable");
             Console.WriteLine(WriteCDATA + " <InputFilename> for 1800 and " + WriteCDATA2070Mode + " <InputFilename> for 2070 to bring <InputFilename> back into .fc");
@@ -66,9 +70,15 @@ namespace AnnoFCConverter
                         modeSet = true;
                         LastArg = "mode";
                     }
-                    else if (s.Equals("-i") && !modeSet)
+                    else if (s.Equals(IsdToHtml) && !modeSet)
                     {
                         mode = "IslandFile";
+                        modeSet = true;
+                        LastArg = "mode";
+                    }
+                    else if (s.Equals(HtmlToIsd) && !modeSet)
+                    {
+                        mode = "HTMLToIslandFile";
                         modeSet = true;
                         LastArg = "mode";
                     }
@@ -157,11 +167,62 @@ namespace AnnoFCConverter
                         }
                     }
 
+                    break;
 
-                    break;
                 case "IslandFile":
-                    p.ConvertISDToHTML(InputFileName, OutputFileName);
+                    if (!hasSpecificOutputFile)
+                    {
+                        OutputFileName = InputFileName.Replace(".isd", ".html");
+                    }
+                    if (!InputFileName.EndsWith(".isd") || !OutputFileName.EndsWith(".html"))
+                    {
+                        Console.WriteLine("Error: Wrong File Types, Input must be .isd and Output must be .html ");
+                    }
+                    else
+                    {
+                        if (File.Exists(OutputFileName) && !OverwriteFile)
+                        {
+                            Console.WriteLine("OutputFile Already Exists. Use " + Overwrite + " as argument to overwrite the file");
+                        }
+                        else if (!File.Exists(InputFileName))
+                        {
+                            Console.WriteLine("Input File does not exist");
+                        }
+                        else
+                        {
+                            p.ConvertISDToHTML(InputFileName, OutputFileName);
+                            Console.WriteLine("Converted " + InputFileName + " to " + OutputFileName);
+                        }
+                    }
                     break;
+                case "HTMLToIslandFile":
+                    if (!hasSpecificOutputFile)
+                    {
+                        OutputFileName = InputFileName.Replace(".html", ".isd");
+                    }
+                    if (!InputFileName.EndsWith(".html") || !OutputFileName.EndsWith(".isd"))
+                    {
+                        Console.WriteLine("Error: Wrong File Types, Input must be .html and Output must be .isd ");
+                    }
+                    else
+                    {
+                        if (File.Exists(OutputFileName) && !OverwriteFile)
+                        {
+                            Console.WriteLine("OutputFile Already Exists. Use " + Overwrite + " as argument to overwrite the file");
+                        }
+                        else if (!File.Exists(InputFileName))
+                        {
+                            Console.WriteLine("Input File does not exist");
+                        }
+                        else
+                        {
+                            p.ConvertToISDFile(InputFileName, OutputFileName);
+                            Console.WriteLine("Converted " + InputFileName + " to " + OutputFileName);
+                        }
+                    }
+                    break;
+
+
                 case "readCDATA2070Mode":
                     if (!hasSpecificOutputFile)
                     {
@@ -1276,7 +1337,7 @@ namespace AnnoFCConverter
                     }
 
                     //conversion with 16 bit int (short)
-                    if (token.Equals("<Height_Map_v2>"))
+                    if (token.Equals("<m_HeightMap_v2>"))
                     {
                         //for implementation
                         //add the next six characters (CDATA[) get the content of the brackets, split it on " " into an array, convert each one into 4 bytes and write them with the binary writer 
