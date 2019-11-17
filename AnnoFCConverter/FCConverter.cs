@@ -793,6 +793,7 @@ namespace AnnoFCConverter
         /// First try to convert anno 2070 island files to html because they are similar in the way that they also use cdata for many things like heightmaps and positions. 
         /// The same algorithm, slightly modified and with other interpretations for cdata should give the possibility to analyze anno 2070 islands easily.
         /// </summary>
+        /// 
         /// <param name="path">path of the input file</param>
         /// <param name="OutputPath">path of the output file</param>
         private void ConvertISDToHTML(string InputPath, string OutputPath)
@@ -1109,6 +1110,274 @@ namespace AnnoFCConverter
                 }
             }
         }
+        /// <summary>
+        /// Converts html code into an anno 2070 island file. 
+        /// How CDATA gets written:
+        /// 
+        /// <Height_Map_v2>: 16 bit uint
+        /// <m_Orientation>, <Position>, <p>: float
+        /// <m_Position>, <m_StreetGrid>, <i>: 32 bit int * 4096
+        /// <m_BitGrid>, <m_RenderParameters>, <m_Connections>: 32 bit int
+        /// <Data>: 32 bit float for Height and 8 bit int for alpha 
+        /// </summary>
+        /// <param name="InputPath"></param>
+        /// <param name="OutputPath"></param>
+        private void ConvertToISDFile(String InputPath, String OutputPath) {
+            if (File.Exists(OutputPath))
+            {
+                File.Delete(OutputPath);
+            }
+            FileStream fs = new FileStream(OutputPath, FileMode.CreateNew);
+            using (StreamReader sr = new StreamReader(InputPath))
+            using (BinaryWriter bw = new BinaryWriter(fs))
+            using (StreamWriter sw = new StreamWriter(fs))
+            {
+                char c = (char)sr.Read();
+                string token = "";
+                String DataParseMode = "";  
+                while (!sr.EndOfStream)
+                {
+                    if (c == '<')
+                    {
+                        while (!(c == '>'))
+                        {
+                            token += c;
+                            c = (char)sr.Read();
+                        }
+                        token += c;
+                        c = (char)sr.Read();
+                        //one token should be complete
+                        sw.Write(token);
+                        sw.Flush();
+
+                        //check if its useful
+                        if (token.Equals("<HeightMap>"))
+                        {
+                            DataParseMode = "height";
+                        }
+                        if (token.Equals("<AlphaMap>"))
+                        {
+                            DataParseMode = "alpha";
+                        }
+                        if (token.Equals("<m_BitGrid>") || token.Equals("m_Connections") || token.Equals("<m_RenderParameters>"))
+                        {
+                            //for implementation
+                            //add the next six characters (CDATA[) get the content of the brackets, split it on " " into an array, convert each one into 4 bytes and write them with the binary writer 
+                            string check = "";
+                            for (int k = 0; k < 6; k++)
+                            {
+                                check += c;
+                                c = (char)sr.Read();
+                            }
+
+                            if (check.Equals("CDATA["))
+                            {
+                                sw.Write(check);
+                                sw.Flush();
+                                string cdata = "";
+                                while (c != ']')
+                                {
+                                    cdata += c;
+                                    c = (char)sr.Read();
+                                }
+                                string[] CdataArr = cdata.Split(' ');
+                                foreach (String s in CdataArr)
+                                {
+                                    //convert s to int and let the binary writer write it
+                                    int IntForm = Int32.Parse(s);
+                                    bw.Write(IntForm);
+                                }
+                            }
+
+                        }
+                        
+                        //reset the token
+                        token = "";
+                    }
+                    //conversion with float
+                    if (token.Equals("<m_Orientation>") || token.Equals("<Position>") || token.Equals("<p>"))
+                    {
+                        //for implementation
+                        //add the next six characters (CDATA[) get the content of the brackets, split it on " " into an array, convert each one into 4 bytes and write them with the binary writer 
+                        string check = "";
+                        for (int k = 0; k < 6; k++)
+                        {
+                            check += c;
+                            c = (char)sr.Read();
+                        }
+
+                        if (check.Equals("CDATA["))
+                        {
+                            sw.Write(check);
+                            sw.Flush();
+                            string cdata = "";
+                            while (c != ']')
+                            {
+                                cdata += c;
+                                c = (char)sr.Read();
+                            }
+                            string[] CdataArr = cdata.Split(' ');
+                            bool isFirst = true;
+                            foreach (String s in CdataArr)
+                            {
+                                if (isFirst)
+                                {
+                                    isFirst = false;
+                                    int intForm = Int32.Parse(s);
+                                    bw.Write(intForm);
+                                }
+                                else
+                                {
+                                    float FloatForm = float.Parse(s);
+                                    bw.Write(FloatForm);
+                                }
+                            }
+                        }
+                    }
+                    //conversion with 32 bit int * 4096
+                    if (token.Equals("<m_Orientation>") || token.Equals("<Position>") || token.Equals("<p>"))
+                    {
+                        //for implementation
+                        //add the next six characters (CDATA[) get the content of the brackets, split it on " " into an array, convert each one into 4 bytes and write them with the binary writer 
+                        string check = "";
+                        for (int k = 0; k < 6; k++)
+                        {
+                            check += c;
+                            c = (char)sr.Read();
+                        }
+
+                        if (check.Equals("CDATA["))
+                        {
+                            sw.Write(check);
+                            sw.Flush();
+                            string cdata = "";
+                            while (c != ']')
+                            {
+                                cdata += c;
+                                c = (char)sr.Read();
+                            }
+                            string[] CdataArr = cdata.Split(' ');
+                            bool isFirst = true;
+                            foreach (String s in CdataArr)
+                            {
+                                if (isFirst)
+                                {
+                                    isFirst = false;
+                                    int intForm = Int32.Parse(s);
+                                    bw.Write(intForm);
+                                }
+                                else
+                                {
+                                    int IntForm = Int32.Parse(s) * 4096;
+                                    bw.Write(IntForm);
+                                }
+                            }
+                        }
+                    }
+
+                    //conversion with 16 bit int (short)
+                    if (token.Equals("<Height_Map_v2>"))
+                    {
+                        //for implementation
+                        //add the next six characters (CDATA[) get the content of the brackets, split it on " " into an array, convert each one into 4 bytes and write them with the binary writer 
+                        string check = "";
+                        for (int k = 0; k < 6; k++)
+                        {
+                            check += c;
+                            c = (char)sr.Read();
+                        }
+
+                        if (check.Equals("CDATA["))
+                        {
+                            sw.Write(check);
+                            sw.Flush();
+                            string cdata = "";
+                            while (c != ']')
+                            {
+                                cdata += c;
+                                c = (char)sr.Read();
+                            }
+                            string[] CdataArr = cdata.Split(' ');
+                            bool isFirst = true;
+                            foreach (String s in CdataArr)
+                            {
+                                if (isFirst)
+                                {
+                                    isFirst = false;
+                                    int intForm = Int32.Parse(s);
+                                    bw.Write(intForm);
+                                }
+                                else
+                                {
+                                    short ShortForm = short.Parse(s);
+                                    bw.Write(ShortForm);
+                                }
+                            }
+                        }
+                    }
+
+                    //flexible conversion for <Data>
+                    if (token.Equals("<Data>"))
+                    {
+                        //for implementation
+                        //add the next six characters (CDATA[) get the content of the brackets, split it on " " into an array, convert each one into 4 bytes and write them with the binary writer 
+                        string check = "";
+                        for (int k = 0; k < 6; k++)
+                        {
+                            check += c;
+                            c = (char)sr.Read();
+                        }
+
+                        if (check.Equals("CDATA["))
+                        {
+                            sw.Write(check);
+                            sw.Flush();
+                            string cdata = "";
+                            while (c != ']')
+                            {
+                                cdata += c;
+                                c = (char)sr.Read();
+                            }
+                            string[] CdataArr = cdata.Split(' ');
+                            bool isFirst = true;
+                            foreach (String s in CdataArr)
+                            {
+                                if (isFirst)
+                                {
+                                    isFirst = false;
+                                    int intForm = Int32.Parse(s);
+                                    bw.Write(intForm);
+                                }
+                                else if(!isFirst && DataParseMode.Equals("height"))
+                                {
+                                    float FloatForm = float.Parse(s);
+                                    bw.Write(FloatForm);
+                                }
+
+                                else if (!isFirst && DataParseMode.Equals("alpha"))
+                                {
+                                    byte ByteForm = byte.Parse(s);
+                                    bw.Write(ByteForm);
+                                }
+                            }
+                        }
+                    }
+                    //as long as there is no opening < character the file gets parsed and added directly to the output 
+                    else if (c != '<')
+                    {
+                        while (c != '<')
+                        {
+                            token += c;
+                            c = (char)sr.Read();
+                        }
+                        sw.Write(token);
+                        sw.Flush();
+                        token = "";
+                    }
+                }
+            }
+        }
+
         private char ToChar(String s)
         {
             char c = System.Convert.ToChar(System.Convert.ToUInt32(s, 16));
