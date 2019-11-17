@@ -13,3 +13,12 @@ AnnoFCConverter.exe with some of those arguments.
 So i.e. to make crops_farm.fc (hypothetical 1800 .fc) for you should type AnnoFCConverter.exe -r crops_farm.fc
 
 thanks to judekw for figuring out how the .fc files work and to meow for taking a look at my code!
+
+
+How CDATA is coded inside island files: 
+
+<Height_Map_v2>: 16 bit uint
+<m_Orientation>, <Position>, <p>: float
+<m_Position>, <m_StreetGrid>, <i>: 32 bit int (values are devided by 4096 in the converted .html for readability)
+<m_BitGrid>, <m_RenderParameters>, <m_Connections>: 32 bit int
+<Data>: 32 bit float for height and 8 bit int for alpha
