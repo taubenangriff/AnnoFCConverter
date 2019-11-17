@@ -6,10 +6,15 @@ The converter works through powershell. Shift + Rightclick in windows explorer t
 AnnoFCConverter.exe with some of those arguments.
 
 -r <InputFilename> for 1800 and -rz <InputFilename> for 2070 to make  <InputFilename> editable
+  
 -w <InputFilename> for 1800 and -wz <InputFilename> for 2070 to bring <InputFilename> back into .fc
+  
 -i <InputFilename> (read isd) and -wi <InputFilename> (write isd) for island file conversion of Anno 2070 .isd files
+  
 -o <OutputFilename> to set a specific output filename
+  
 -y to overwrite the output File
+
 
 So i.e. to make crops_farm.fc (hypothetical 1800 .fc) for you should type AnnoFCConverter.exe -r crops_farm.fc
 
