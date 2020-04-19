@@ -7,283 +7,227 @@ using System.Threading.Tasks;
 
 namespace AnnoFCConverter
 {
+
     class FCConverter
     {
+        //commands 
+        private static string FcToCf7 = "-r";
+        private static string Cf7ToFc = "-w";
+        private static string FcToCf5 = "-rz";
+        private static string Cf5ToFc = "-wz";
+        private static string SpecificOutputFile = "-o";
+        private static string Overwrite = "-y";
+        private static string IsdToCi5 = "-i";
+        private static string Ci5ToIsd = "-wi";
+        private static string ActivateErrorLogging = "-e";
+        private static string Help = "-help"; 
+
+        //file formats
+        private static string FileFormatFc = "fc";
+        private static string FileFormatCf7 = "cf7";
+        private static string FileFormatCf5 = "cf5";
+        private static string FileFormatIsd = "isd";
+        private static string FileFormatCi5 = "ci5"; 
+
+        private enum Modes { FcToCf7, Cf7ToFc, FcToCf5, Cf5ToFc, IsdToCi5, Ci5ToIsd }
+
         static void Main(string[] args)
         {
             string appName = "Anno 1800 FC-Converter";
             string version = "1.1.0";
-            Console.WriteLine("{0}: Version {1}     How to use:", appName, version);
+            Console.WriteLine("{0}: Version {1}, use -help for explanation. ", appName, version);
 
-
-            //final variables
-            string ReadCDATA = "-r";
-            string WriteCDATA = "-w";
-            string ReadCDATA2070Mode = "-rz";
-            string WriteCDATA2070Mode = "-wz";
-            string SpecificOutputFile = "-o";
-            string Overwrite = "-y";
-            string IsdToHtml = "-i";
-            string HtmlToIsd = "-wi";
-
-            Console.WriteLine(ReadCDATA + " <InputFilename> for 1800 and " + ReadCDATA2070Mode + " <InputFilename> for 2070 to make  <InputFilename> editable");
-            Console.WriteLine(WriteCDATA + " <InputFilename> for 1800 and " + WriteCDATA2070Mode + " <InputFilename> for 2070 to bring <InputFilename> back into .fc");
-            Console.WriteLine(SpecificOutputFile + " <OutputFilename> to set a specific output filename");
-            Console.WriteLine(Overwrite + " to overwrite the output File");
-            Console.WriteLine("");
 
             FCConverter p = new FCConverter();
+            p.HandleFileRequest(args);
+        }
 
-            string mode = "";
+        private void PrintHelp() {
+            string HelpText = "Usage: \n" +
+                FcToCf7 + " to convert Anno 1800 ." + FileFormatFc + " Files into ." + FileFormatCf7 + " Files. \n" +
+                FcToCf5 + " to convert Anno 2070 ." + FileFormatFc + " Files into ." + FileFormatCf5 + " Files. \n" +
+                Cf7ToFc + " to convert ." + FileFormatCf7 + " Files into Anno 1800 ." + FileFormatFc + " Files. \n" +
+                Cf5ToFc + " to convert ." + FileFormatCf5 + " Files into Anno 2070 ." + FileFormatFc + " Files. \n" +
+                IsdToCi5 + " to convert Anno 2070 ." + FileFormatIsd + " Files into ." + FileFormatCi5 + " Files. \n" +
+                Ci5ToIsd + " to convert ." + FileFormatCi5 + " Files into Anno 2070 ." + FileFormatIsd + " Files. \n" +
+                SpecificOutputFile + " <FileName> to set a specific output filename. \n" +
+                Overwrite + " to overwrite an existing output file. \n" +
+                ActivateErrorLogging + " to activate detailed Error Logging";
+
+            Console.WriteLine(HelpText); 
+        }
+
+        private void HandleFileRequest(String[] args) 
+        {
+            int mode = -1; 
             bool modeSet = false;
             string InputFileName = "";
             bool hasSpecificOutputFile = false;
             string OutputFileName = "";
             bool OverwriteFile = false;
-            string LastArg = "";
+            bool ErrorLoggingActivated = false;
+            bool HelpRequested = false; 
 
-            foreach (string s in args)
-            {
-                if (s.StartsWith("-"))
+            string ExpectedInputFormat = "";
+            string ExpectedOutputFormat = "";
+
+            for (int i = 0; i < args.Length; i++) {
+
+                //Mode Fc to Cf7
+                if (args[i].Equals(FcToCf7) && !modeSet)
                 {
-                    if (s.Equals(ReadCDATA) && !modeSet)
+                    mode = (int)Modes.FcToCf7;
+                    modeSet = true;
+                    ExpectedInputFormat = FileFormatFc;
+                    ExpectedOutputFormat = FileFormatCf7;
+                }
+
+                //Mode Cf7 to Fc
+                else if (args[i].Equals(Cf7ToFc) && !modeSet)
+                {
+                    mode = (int)Modes.Cf7ToFc;
+                    modeSet = true;
+                    ExpectedInputFormat = FileFormatCf7;
+                    ExpectedOutputFormat = FileFormatFc;
+                }
+
+                //Mode Fc to Cf5 (Anno 2070) 
+                else if (args[i].Equals(FcToCf5) && !modeSet)
+                {
+                    mode = (int)Modes.FcToCf5;
+                    modeSet = true;
+                    ExpectedInputFormat = FileFormatFc;
+                    ExpectedOutputFormat = FileFormatCf5;
+                }
+
+                //Mode Cf5 to Fc (Anno 2070
+                else if (args[i].Equals(Cf5ToFc) && !modeSet)
+                {
+                    mode = (int)Modes.Cf5ToFc;
+                    modeSet = true;
+                    ExpectedInputFormat = FileFormatCf5;
+                    ExpectedOutputFormat = FileFormatFc;
+                }
+
+                //Mode Isd to Ci5 (Anno 2070)
+                else if (args[i].Equals(IsdToCi5) && !modeSet)
+                {
+                    mode = (int)Modes.IsdToCi5;
+                    modeSet = true;
+                    ExpectedInputFormat = FileFormatIsd;
+                    ExpectedOutputFormat = FileFormatCi5;
+                }
+
+                //Mode Ci5 to Isd (Anno 2070)
+                else if (args[i].Equals(Ci5ToIsd) && !modeSet)
+                {
+                    mode = (int)Modes.Ci5ToIsd;
+                    modeSet = true;
+                    ExpectedInputFormat = FileFormatCi5;
+                    ExpectedOutputFormat = FileFormatIsd;
+                }
+
+                //parsing help request
+
+                else if (args[i].Equals(Help)) {
+                    PrintHelp();
+                    HelpRequested = true; 
+                }
+
+                //parsing overwrite
+                else if (args[i].Equals(Overwrite))
+                {
+                    OverwriteFile = true;
+                }
+
+                //Specific Output Files, will automatically take the next arg as Output Filename, unless it starts with a '-'. 
+                else if (args[i].Equals(SpecificOutputFile))
+                {
+                    try
                     {
-                        mode = "readCDATA";
-                        modeSet = true;
-                        LastArg = "mode";
+                        if (!args[i].StartsWith("-"))
+                        {
+                            OutputFileName = args[i + 1];
+                            hasSpecificOutputFile = true;
+                        }
+                        else
+                        {
+                            Console.WriteLine("You forgot giving me an Output Filename.");
+                        }
+
                     }
-                    else if (s.Equals(ReadCDATA2070Mode) && !modeSet)
+                    catch (IndexOutOfRangeException e)
                     {
-                        mode = "readCDATA2070Mode";
-                        modeSet = true;
-                        LastArg = "mode";
-                    }
-                    else if (s.Equals(WriteCDATA) && !modeSet)
-                    {
-                        mode = "writeCDATA";
-                        modeSet = true;
-                        LastArg = "mode";
-                    }
-                    else if (s.Equals(WriteCDATA2070Mode) && !modeSet)
-                    {
-                        mode = "writeCDATA2070Mode";
-                        modeSet = true;
-                        LastArg = "mode";
-                    }
-                    else if (s.Equals(IsdToHtml) && !modeSet)
-                    {
-                        mode = "IslandFile";
-                        modeSet = true;
-                        LastArg = "mode";
-                    }
-                    else if (s.Equals(HtmlToIsd) && !modeSet)
-                    {
-                        mode = "HTMLToIslandFile";
-                        modeSet = true;
-                        LastArg = "mode";
-                    }
-                    else if (s.Equals(SpecificOutputFile))
-                    {
-                        hasSpecificOutputFile = true;
-                        LastArg = "output";
-                    }
-                    else if (s.Equals(Overwrite))
-                    {
-                        OverwriteFile = true;
-                        LastArg = "overwrite";
+                        Console.WriteLine("You forgot giving me an Output Filename.");
                     }
                 }
+
+                //if the mode is set, you can now start with 
+                else if (modeSet && args[i].EndsWith(ExpectedInputFormat))
+                {
+                    InputFileName = args[i];
+                }
+
                 else
                 {
-                    if (LastArg.Equals("mode"))
+                    Console.WriteLine("Error: " + args[i] + " is an unrecognized Argument! Make sure to set the mode before you give the input filename!");
+                }
+            }
+
+            //now everything should be parsed :) start with conversion. 
+
+            //set the output file name
+            if (!hasSpecificOutputFile) {
+                OutputFileName = InputFileName.Split('.')[0] + "." + ExpectedOutputFormat; 
+            }
+
+            //check for wrong input formats and already existing output file. 
+            bool FileTypeError = false; 
+            if (!InputFileName.EndsWith(ExpectedInputFormat)) {
+                Console.WriteLine("Error: Wrong Input Format!");
+                FileTypeError = true; 
+            }
+            if (!OutputFileName.EndsWith(ExpectedOutputFormat)) {
+                Console.WriteLine("Error: Wrong Output Format!");
+                FileTypeError = true; 
+            }
+            if (File.Exists(OutputFileName) && !OverwriteFile) {
+                Console.WriteLine("Error: Output File Already Exists! use " + Overwrite + " to Overwrite.");
+                FileTypeError = true; 
+            }
+
+            if (!FileTypeError)
+            {
+                try
+                {
+                    if (mode == (int)Modes.Cf7ToFc)
                     {
-                        InputFileName = s;
-                        LastArg = "";
+                        ConvertToFCFile(InputFileName, OutputFileName);
+                        Console.WriteLine(InputFileName + " was converted to " + OutputFileName);
                     }
-                    else if (LastArg.Equals("output"))
+                    else if (mode == (int)Modes.FcToCf7)
                     {
-                        OutputFileName = s;
-                        LastArg = "";
+                        ConvertToHTMLFile(InputFileName, OutputFileName);
+                        Console.WriteLine(InputFileName + " was converted to " + OutputFileName);
+                    }
+                    else if (!HelpRequested) {
+                        Console.WriteLine("Error: No Mode for Conversion was set!"); 
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    if (ErrorLoggingActivated)
+                    {
+                        Console.WriteLine(e.Message);
                     }
                     else
                     {
-                        LastArg = "";
+                        Console.WriteLine("An unknown Error has occured. Please create an Issue on the Github Page with the file that caused this!");
                     }
                 }
             }
-            switch (mode)
-            {
-                case "readCDATA":
-                    if (!hasSpecificOutputFile)
-                    {
-                        OutputFileName = InputFileName.Replace(".fc", "") + ".html";
-                    }
-                    if (!InputFileName.EndsWith(".fc") || !OutputFileName.EndsWith(".html"))
-                    {
-                        Console.WriteLine("Error: Wrong File Types, Input must be .fc and Output must be .html ");
-                    }
-                    else
-                    {
-                        if (File.Exists(OutputFileName) && !OverwriteFile)
-                        {
-                            Console.WriteLine("OutputFile Already Exists. Use " + Overwrite + " as argument to overwrite the file");
-                        }
-                        else if (!File.Exists(InputFileName))
-                        {
-                            Console.WriteLine("Input File does not exist");
-                        }
-                        else
-                        {
-                            p.ConvertToHTMLFile(InputFileName, OutputFileName);
-                            Console.WriteLine("Converted " + InputFileName + " to " + OutputFileName);
-                        }
-                    }
-
-
-                    break;
-                case "writeCDATA":
-                    if (!hasSpecificOutputFile)
-                    {
-                        OutputFileName = InputFileName.Replace(".html", "") + ".fc";
-                    }
-                    if (!InputFileName.EndsWith(".html") || !OutputFileName.EndsWith(".fc"))
-                    {
-                        Console.WriteLine("Error: Wrong File Types, Input must be .html and Output must be .fc ");
-                    }
-                    else
-                    {
-                        if (File.Exists(OutputFileName) && !OverwriteFile)
-                        {
-                            Console.WriteLine("OutputFile Already Exists. Use " + Overwrite + " as argument to overwrite the file");
-                        }
-                        else if (!File.Exists(InputFileName))
-                        {
-                            Console.WriteLine("Input File does not exist");
-                        }
-                        else
-                        {
-                            p.ConvertToFCFile(InputFileName, OutputFileName);
-                            Console.WriteLine("Converted " + InputFileName + " to " + OutputFileName);
-                        }
-                    }
-
-                    break;
-
-                case "IslandFile":
-                    if (!hasSpecificOutputFile)
-                    {
-                        OutputFileName = InputFileName.Replace(".isd", ".html");
-                    }
-                    if (!InputFileName.EndsWith(".isd") || !OutputFileName.EndsWith(".html"))
-                    {
-                        Console.WriteLine("Error: Wrong File Types, Input must be .isd and Output must be .html ");
-                    }
-                    else
-                    {
-                        if (File.Exists(OutputFileName) && !OverwriteFile)
-                        {
-                            Console.WriteLine("OutputFile Already Exists. Use " + Overwrite + " as argument to overwrite the file");
-                        }
-                        else if (!File.Exists(InputFileName))
-                        {
-                            Console.WriteLine("Input File does not exist");
-                        }
-                        else
-                        {
-                            p.ConvertISDToHTML(InputFileName, OutputFileName);
-                            Console.WriteLine("Converted " + InputFileName + " to " + OutputFileName);
-                        }
-                    }
-                    break;
-                case "HTMLToIslandFile":
-                    if (!hasSpecificOutputFile)
-                    {
-                        OutputFileName = InputFileName.Replace(".html", ".isd");
-                    }
-                    if (!InputFileName.EndsWith(".html") || !OutputFileName.EndsWith(".isd"))
-                    {
-                        Console.WriteLine("Error: Wrong File Types, Input must be .html and Output must be .isd ");
-                    }
-                    else
-                    {
-                        if (File.Exists(OutputFileName) && !OverwriteFile)
-                        {
-                            Console.WriteLine("OutputFile Already Exists. Use " + Overwrite + " as argument to overwrite the file");
-                        }
-                        else if (!File.Exists(InputFileName))
-                        {
-                            Console.WriteLine("Input File does not exist");
-                        }
-                        else
-                        {
-                            p.ConvertToISDFile(InputFileName, OutputFileName);
-                            Console.WriteLine("Converted " + InputFileName + " to " + OutputFileName);
-                        }
-                    }
-                    break;
-
-
-                case "readCDATA2070Mode":
-                    if (!hasSpecificOutputFile)
-                    {
-                        OutputFileName = InputFileName.Replace(".fc", "") + ".html";
-                    }
-                    if (!InputFileName.EndsWith(".fc") || !OutputFileName.EndsWith(".html"))
-                    {
-                        Console.WriteLine("Error: Wrong File Types, Input must be .fc and Output must be .html ");
-                    }
-                    else
-                    {
-                        if (File.Exists(OutputFileName) && !OverwriteFile)
-                        {
-                            Console.WriteLine("OutputFile Already Exists. Use " + Overwrite + " as argument to overwrite the file");
-                        }
-                        else if (!File.Exists(InputFileName))
-                        {
-                            Console.WriteLine("Input File does not exist");
-                        }
-                        else
-                        {
-                            p.Convert2070IntoHTML(InputFileName, OutputFileName);
-                            Console.WriteLine("Converted " + InputFileName + " to " + OutputFileName);
-                        }
-                    }
-
-
-                    break;
-                case "writeCDATA2070Mode":
-                    if (!hasSpecificOutputFile)
-                    {
-                        OutputFileName = InputFileName.Replace(".html", "") + ".fc";
-                    }
-                    if (!InputFileName.EndsWith(".html") || !OutputFileName.EndsWith(".fc"))
-                    {
-                        Console.WriteLine("Error: Wrong File Types, Input must be .html and Output must be .fc ");
-                    }
-                    else
-                    {
-                        if (File.Exists(OutputFileName) && !OverwriteFile)
-                        {
-                            Console.WriteLine("OutputFile Already Exists. Use " + Overwrite + " as argument to overwrite the file");
-                        }
-                        else if (!File.Exists(InputFileName))
-                        {
-                            Console.WriteLine("Input File does not exist");
-                        }
-                        else
-                        {
-                            p.ConvertTo2070FCFile(InputFileName, OutputFileName);
-                            Console.WriteLine("Converted " + InputFileName + " to " + OutputFileName);
-                        }
-                    }
-
-                    break;
-                case "":
-                    Console.WriteLine("Error: No Mode for conversion was set");
-                    break;
-            }
-            return;
-        }
+        }   
 
 
         private void ConvertToFCFile(string InputPath, string OutputPath)
@@ -1033,7 +977,7 @@ namespace AnnoFCConverter
                                 //write CDATA[ and advance by one character
                                 offset++;
                                 c = ToChar(HexData[offset]);
-                                int breakpointInt = 1; 
+                                int breakpointInt = 1;
                                 {
                                     sw.Write("CDATA[");
                                     //interpret cdata as an 32 bit int
@@ -1080,7 +1024,7 @@ namespace AnnoFCConverter
                                     //write CDATA[ and advance by one character
                                     offset++;
                                     c = ToChar(HexData[offset]);
-                                    int breakpointInt = 0; 
+                                    int breakpointInt = 0;
 
                                     {
                                         sw.Write("CDATA[");
@@ -1092,14 +1036,15 @@ namespace AnnoFCConverter
                                         for (int i = 0; i <= ByteSize / 4; i++)
                                         {
                                             sw.Write(CDATAAsFloat[i]);
-                                            if (breakpointInt % 17 == 0) {
+                                            if (breakpointInt % 17 == 0)
+                                            {
                                                 sw.Write("\n\t\t\t\t\t");
                                                 breakpointInt++;
                                             }
                                             else if (i < ByteSize / 4)
                                             {
                                                 sw.Write(" ");
-                                                breakpointInt++; 
+                                                breakpointInt++;
                                             }
                                         }
                                         c = ToChar(HexData[offset]);
@@ -1121,7 +1066,7 @@ namespace AnnoFCConverter
                                         //write CDATA[ and advance by one character
                                         offset++;
                                         c = ToChar(HexData[offset]);
-                                        int breakpointInt = 0; 
+                                        int breakpointInt = 0;
                                         {
                                             sw.Write("CDATA[");
                                             //interpret cdata as an 8 bit uint
@@ -1183,7 +1128,8 @@ namespace AnnoFCConverter
         /// </summary>
         /// <param name="InputPath"></param>
         /// <param name="OutputPath"></param>
-        private void ConvertToISDFile(String InputPath, String OutputPath) {
+        private void ConvertToISDFile(String InputPath, String OutputPath)
+        {
             if (File.Exists(OutputPath))
             {
                 File.Delete(OutputPath);
@@ -1195,7 +1141,7 @@ namespace AnnoFCConverter
             {
                 char c = (char)sr.Read();
                 string token = "";
-                String DataParseMode = "";  
+                String DataParseMode = "";
                 while (!sr.EndOfStream)
                 {
                     if (c == '<')
@@ -1251,7 +1197,7 @@ namespace AnnoFCConverter
                             }
 
                         }
-                        
+
                         //reset the token
                         token = "";
                     }
@@ -1409,7 +1355,7 @@ namespace AnnoFCConverter
                                     int intForm = Int32.Parse(s);
                                     bw.Write(intForm);
                                 }
-                                else if(!isFirst && DataParseMode.Equals("height"))
+                                else if (!isFirst && DataParseMode.Equals("height"))
                                 {
                                     float FloatForm = float.Parse(s);
                                     bw.Write(FloatForm);
@@ -1446,4 +1392,3 @@ namespace AnnoFCConverter
         }
     }
 }
-
