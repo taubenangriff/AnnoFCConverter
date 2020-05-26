@@ -262,27 +262,35 @@ namespace AnnoFCConverter
                         {
                             //for implementation
                             //add the next six characters (CDATA[) get the content of the brackets, split it on " " into an array, convert each one into 4 bytes and write them with the binary writer 
+
+                            //fuck empty tags... Check if Cdata exists first.
+                            String CdataCheck = ""; 
                             for (int k = 0; k < 6; k++)
                             {
-                                sw.Write(c);
+                                CdataCheck += c; 
                                 c = (char)sr.Read();
                             }
+                            //we advanced six characters - write them nonetheless, we still need em. 
+                            sw.Write(CdataCheck);
+                            if (CdataCheck.Equals("CDATA[")) {
+                                
+                                sw.Flush();
 
-                            sw.Flush();
-
-                            string cdata = "";
-                            while (c != ']')
-                            {
-                                cdata += c;
-                                c = (char)sr.Read();
+                                string cdata = "";
+                                while (c != ']')
+                                {
+                                    cdata += c;
+                                    c = (char)sr.Read();
+                                }
+                                string[] CdataArr = cdata.Split(' ');
+                                foreach (String s in CdataArr)
+                                {
+                                    //convert s to int and let the binary writer write it
+                                    int IntForm = Int32.Parse(s);
+                                    bw.Write(IntForm);
+                                }
                             }
-                            string[] CdataArr = cdata.Split(' ');
-                            foreach (String s in CdataArr)
-                            {
-                                //convert s to int and let the binary writer write it
-                                int IntForm = Int32.Parse(s);
-                                bw.Write(IntForm);
-                            }
+                            
                         }
                         //reset the token
                         token = "";
@@ -342,10 +350,11 @@ namespace AnnoFCConverter
                                 check += c;
                                 c = (char)sr.Read();
                             }
-
+                            //write the check nonetheless, we need it. 
+                            sw.Write(check);
                             if (check.Equals("CDATA["))
                             {
-                                sw.Write(check);
+                                
                                 sw.Flush();
                                 string cdata = "";
                                 while (c != ']')
