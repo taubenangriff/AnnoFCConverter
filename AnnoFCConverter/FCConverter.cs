@@ -29,7 +29,7 @@ namespace AnnoFCConverter
         private static string FileFormatIsd = "isd";
         private static string FileFormatCi5 = "ci5"; 
 
-        private enum Modes { FcToCf7, Cf7ToFc, FcToCf5, Cf5ToFc, IsdToCi5, Ci5ToIsd }
+        private enum Modes { noMode = -1, FcToCf7, Cf7ToFc, FcToCf5, Cf5ToFc, IsdToCi5, Ci5ToIsd }
 
         static void Main(string[] args)
         {
@@ -59,7 +59,7 @@ namespace AnnoFCConverter
 
         private void HandleFileRequest(String[] args) 
         {
-            int mode = -1; 
+            Modes mode = Modes.noMode; 
             bool modeSet = false;
             string InputFileName = "";
             bool hasSpecificOutputFile = false;
@@ -76,7 +76,7 @@ namespace AnnoFCConverter
                 //Mode Fc to Cf7
                 if (args[i].Equals(FcToCf7) && !modeSet)
                 {
-                    mode = (int)Modes.FcToCf7;
+                    mode = Modes.FcToCf7;
                     modeSet = true;
                     ExpectedInputFormat = FileFormatFc;
                     ExpectedOutputFormat = FileFormatCf7;
@@ -85,7 +85,7 @@ namespace AnnoFCConverter
                 //Mode Cf7 to Fc
                 else if (args[i].Equals(Cf7ToFc) && !modeSet)
                 {
-                    mode = (int)Modes.Cf7ToFc;
+                    mode = Modes.Cf7ToFc;
                     modeSet = true;
                     ExpectedInputFormat = FileFormatCf7;
                     ExpectedOutputFormat = FileFormatFc;
@@ -94,7 +94,7 @@ namespace AnnoFCConverter
                 //Mode Fc to Cf5 (Anno 2070) 
                 else if (args[i].Equals(FcToCf5) && !modeSet)
                 {
-                    mode = (int)Modes.FcToCf5;
+                    mode = Modes.FcToCf5;
                     modeSet = true;
                     ExpectedInputFormat = FileFormatFc;
                     ExpectedOutputFormat = FileFormatCf5;
@@ -103,7 +103,7 @@ namespace AnnoFCConverter
                 //Mode Cf5 to Fc (Anno 2070
                 else if (args[i].Equals(Cf5ToFc) && !modeSet)
                 {
-                    mode = (int)Modes.Cf5ToFc;
+                    mode = Modes.Cf5ToFc;
                     modeSet = true;
                     ExpectedInputFormat = FileFormatCf5;
                     ExpectedOutputFormat = FileFormatFc;
@@ -112,7 +112,7 @@ namespace AnnoFCConverter
                 //Mode Isd to Ci5 (Anno 2070)
                 else if (args[i].Equals(IsdToCi5) && !modeSet)
                 {
-                    mode = (int)Modes.IsdToCi5;
+                    mode = Modes.IsdToCi5;
                     modeSet = true;
                     ExpectedInputFormat = FileFormatIsd;
                     ExpectedOutputFormat = FileFormatCi5;
@@ -121,23 +121,28 @@ namespace AnnoFCConverter
                 //Mode Ci5 to Isd (Anno 2070)
                 else if (args[i].Equals(Ci5ToIsd) && !modeSet)
                 {
-                    mode = (int)Modes.Ci5ToIsd;
+                    mode = Modes.Ci5ToIsd;
                     modeSet = true;
                     ExpectedInputFormat = FileFormatCi5;
                     ExpectedOutputFormat = FileFormatIsd;
                 }
 
                 //parsing help request
-
-                else if (args[i].Equals(Help)) {
+                else if (args[i].Equals(Help))
+                {
                     PrintHelp();
-                    HelpRequested = true; 
+                    HelpRequested = true;
                 }
 
                 //parsing overwrite
                 else if (args[i].Equals(Overwrite))
                 {
                     OverwriteFile = true;
+                }
+
+                //parsing ErrorLogging 
+                else if (args[i].Equals(ActivateErrorLogging)) {
+                    ErrorLoggingActivated = true;
                 }
 
                 //Specific Output Files, will automatically take the next arg as Output Filename, unless it starts with a '-'. 
@@ -200,12 +205,12 @@ namespace AnnoFCConverter
             {
                 try
                 {
-                    if (mode == (int)Modes.Cf7ToFc)
+                    if (mode == Modes.Cf7ToFc)
                     {
                         ConvertToFCFile(InputFileName, OutputFileName);
                         Console.WriteLine(InputFileName + " was converted to " + OutputFileName);
                     }
-                    else if (mode == (int)Modes.FcToCf7)
+                    else if (mode == Modes.FcToCf7)
                     {
                         ConvertToHTMLFile(InputFileName, OutputFileName);
                         Console.WriteLine(InputFileName + " was converted to " + OutputFileName);
@@ -220,6 +225,8 @@ namespace AnnoFCConverter
                     if (ErrorLoggingActivated)
                     {
                         Console.WriteLine(e.Message);
+                        Console.WriteLine();
+                        Console.WriteLine(e.StackTrace);
                     }
                     else
                     {
