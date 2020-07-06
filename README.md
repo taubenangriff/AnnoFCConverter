@@ -1,6 +1,6 @@
 # AnnoFCConverter
-Allows to convert Anno 1800 and 2070 .fc files into html format which can be read by a human with a text editor like vsc and back into .fc
-to use it in Anno. And because island files are pretty much the same I just did a quick implementation for that too. 
+Allows to convert Anno 1800 and 2070 .fc files into custom file formats which can be read by a human with a text editor like vsc and back into .fc
+to use it in Anno. And because Anno 2070 island files are pretty much the same I just did a quick implementation for that too, maybe someone wants to do an island creator?
 
 The converter works through powershell. Shift + Rightclick in windows explorer to open up a Powershell window and then start 
 AnnoFCConverter.exe with some of those arguments.
@@ -15,11 +15,10 @@ AnnoFCConverter.exe with some of those arguments.
   
 -y to overwrite the output File
 
-
 So i.e. to make crops_farm.fc (hypothetical 1800 .fc) for you should type AnnoFCConverter.exe -r crops_farm.fc
 
-thanks to judekw for figuring out how the .fc files work and to meow for taking a look at my code!
 
+thanks to judekw for figuring out how the .fc files work and to meow for taking a look at my code!
 
 
 How CDATA is coded inside island files: 
