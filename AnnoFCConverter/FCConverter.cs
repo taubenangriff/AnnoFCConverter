@@ -150,10 +150,12 @@ namespace AnnoFCConverter
                 {
                     try
                     {
-                        if (!args[i].StartsWith("-"))
+                        if (!args[i + 1].StartsWith("-"))
                         {
                             OutputFileName = args[i + 1];
                             hasSpecificOutputFile = true;
+                            // skip parsing next arg as we already used it
+                            i++;
                         }
                         else
                         {
@@ -161,7 +163,7 @@ namespace AnnoFCConverter
                         }
 
                     }
-                    catch (IndexOutOfRangeException e)
+                    catch (IndexOutOfRangeException)
                     {
                         Console.WriteLine("You forgot giving me an Output Filename.");
                     }
