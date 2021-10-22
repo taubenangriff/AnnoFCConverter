@@ -255,7 +255,7 @@ namespace AnnoFCConverter
                 {
                     if (c == '<')
                     {
-                        while (!(c == '>'))
+                        while (!(c == '>') && !sr.EndOfStream)
                         {
                             token += c;
                             c = (char)sr.Read();
@@ -285,7 +285,7 @@ namespace AnnoFCConverter
                                 sw.Flush();
 
                                 string cdata = "";
-                                while (c != ']')
+                                while (c != ']' && !sr.EndOfStream)
                                 {
                                     cdata += c;
                                     c = (char)sr.Read();
@@ -305,7 +305,7 @@ namespace AnnoFCConverter
                     }//as long as there is no opening < character the file gets parsed and added directly to the output 
                     else if (c != '<')
                     {
-                        while (c != '<')
+                        while (c != '<' && !sr.EndOfStream)
                         {
                             token += c;
                             c = (char)sr.Read();
@@ -337,7 +337,7 @@ namespace AnnoFCConverter
                 {
                     if (c == '<')
                     {
-                        while (!(c == '>'))
+                        while (!(c == '>') && !sr.EndOfStream)
                         {
                             token += c;
                             c = (char)sr.Read();
@@ -365,7 +365,7 @@ namespace AnnoFCConverter
                                 
                                 sw.Flush();
                                 string cdata = "";
-                                while (c != ']')
+                                while (c != ']' && !sr.EndOfStream)
                                 {
                                     cdata += c;
                                     c = (char)sr.Read();
@@ -396,7 +396,7 @@ namespace AnnoFCConverter
                                 sw.Write(check);
                                 sw.Flush();
                                 string cdata = "";
-                                while (c != ']')
+                                while (c != ']' && !sr.EndOfStream)
                                 {
                                     cdata += c;
                                     c = (char)sr.Read();
@@ -426,7 +426,7 @@ namespace AnnoFCConverter
                     //as long as there is no opening < character the file gets parsed and added directly to the output 
                     else if (c != '<')
                     {
-                        while (c != '<')
+                        while (c != '<' && !sr.EndOfStream)
                         {
                             token += c;
                             c = (char)sr.Read();
