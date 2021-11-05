@@ -1,4 +1,10 @@
-# AnnoFCConverter
+# IMPORTANT
+
+This Program is being abandoned and will not be supported in the future!
+
+As a better and more stable alternative, you should use the [FileDBReader Tool](https://github.com/anno-mods/FileDBReader) which comes with built-in support for fc files and offers you to configure what should be read as what. 
+
+## AnnoFCConverter (Depracated)
 Allows to convert Anno 1800 and 2070 .fc files into custom file formats which can be read by a human with a text editor like vsc and back into .fc
 to use it in Anno. And because Anno 2070 island files are pretty much the same I just did a quick implementation for that too, maybe someone wants to do an island creator?
 
